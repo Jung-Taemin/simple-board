@@ -30,7 +30,7 @@ public class UserService {
 
         User user = User.builder()
                 .email(requestDto.getEmail())
-                .password(requestDto.getPassword())
+                .password(encodedPassword)
                 .name(requestDto.getName())
                 .build();
 
@@ -41,13 +41,15 @@ public class UserService {
 
     public LoginResponseDto login(LoginRequestDto requestDto) {
         User user = userRepository.findByEmail(requestDto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호 불일치");
+        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String token = tokenProvider.generateToken(user, Duration.ofHours(1));
-        return new LoginResponseDto(token);
+        String token = tokenProvider.generateToken(user.getEmail());
+
+        return new LoginResponseDto(user.getEmail(), token);
     }
+
 }
