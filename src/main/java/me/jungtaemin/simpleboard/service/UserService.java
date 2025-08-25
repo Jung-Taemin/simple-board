@@ -21,17 +21,17 @@ public class UserService {
     private final TokenProvider tokenProvider;
 
     public SignupResponseDto signup(SignupRequestDto requestDto) {
-        userRepository.findByEmail(requestDto.getEmail())
+        userRepository.findByEmail(requestDto.email())
                 .ifPresent(user -> {
                     throw new IllegalArgumentException("이미 존재하는 이메일입니다");
                 });
 
-        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
+        String encodedPassword = passwordEncoder.encode(requestDto.password());
 
         User user = User.builder()
-                .email(requestDto.getEmail())
+                .email(requestDto.email())
                 .password(encodedPassword)
-                .name(requestDto.getName())
+                .name(requestDto.name())
                 .build();
 
         userRepository.save(user);
@@ -40,10 +40,10 @@ public class UserService {
     }
 
     public LoginResponseDto login(LoginRequestDto requestDto) {
-        User user = userRepository.findByEmail(requestDto.getEmail())
+        User user = userRepository.findByEmail(requestDto.email())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(requestDto.password(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 

@@ -41,20 +41,20 @@ public class ArticleService {
     public ArticleResponseDto create(ArticleRequestDto dto) {
         String email = currentEmail();
         Article article = Article.builder()
-                .title(dto.getTitle())
-                .content(dto.getContent())
+                .title(dto.title())
+                .content(dto.content())
                 .author(email)
                 .build();
 
         Article saved = articleRepository.save(article);
 
         eventPublisher.publishArticleCreated(
-                ArticleCreatedEvent.builder()
-                        .id(saved.getId())
-                        .title(saved.getTitle())
-                        .author(saved.getAuthor())
-                        .createdAt(Instant.now())
-                        .build()
+                new ArticleCreatedEvent(
+                        saved.getId(),
+                        saved.getTitle(),
+                        saved.getAuthor(),
+                        Instant.now()
+                )
         );
 
         return new ArticleResponseDto(saved.getId(), saved.getTitle(), saved.getContent(), saved.getAuthor());
@@ -83,7 +83,7 @@ public class ArticleService {
         if (!email.equals(article.getAuthor())) {
             throw new SecurityException("작성자만 수정할 수 있습니다.");
         }
-        article.update(dto.getTitle(), dto.getContent());
+        article.update(dto.title(), dto.content());
         return new ArticleResponseDto(article.getId(), article.getTitle(), article.getContent(), article.getAuthor());
     }
 
