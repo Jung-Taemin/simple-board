@@ -36,7 +36,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        return new SignupResponseDto(user.getEmail(), user.getName());
+        return new SignupResponseDto(user.getId(), user.getEmail(), user.getName());
     }
 
     public LoginResponseDto login(LoginRequestDto requestDto) {

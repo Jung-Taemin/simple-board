@@ -4,24 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-
 @Component
 @RequiredArgsConstructor
 public class ArticleEventPublisher {
 
-    private final KafkaTemplate<String, Object> kafka;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void publishCreated(Long id, String title, String author) {
-        kafka.send("article.created", id.toString(),
-                new ArticleCreatedEvent(id, title, author, Instant.now()));
+    public void publishArticleCreated(ArticleCreatedEvent event) {
+        kafkaTemplate.send("article.created", String.valueOf(event.id()), event);
     }
-    public void publishUpdated(Long id, String title, String author) {
-        kafka.send("article.updated", id.toString(),
-                new ArticleUpdatedEvent(id, title, author, Instant.now()));
+
+    public void publishArticleUpdated(ArticleUpdatedEvent event) {
+        kafkaTemplate.send("article.updated", String.valueOf(event.id()), event);
     }
-    public void publishDeleted(Long id, String author) {
-        kafka.send("article.deleted", id.toString(),
-                new ArticleDeletedEvent(id, author, Instant.now()));
+
+    public void publishArticleDeleted(ArticleDeletedEvent event) {
+        kafkaTemplate.send("article.deleted", String.valueOf(event.id()), event);
     }
 }
