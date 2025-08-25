@@ -1,13 +1,19 @@
 package me.jungtaemin.simpleboard.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.jungtaemin.simpleboard.dto.ArticleRequestDto;
 import me.jungtaemin.simpleboard.dto.ArticleResponseDto;
 import me.jungtaemin.simpleboard.service.ArticleService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,13 +23,16 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @PostMapping
-    public ResponseEntity<ArticleResponseDto> create(@RequestBody ArticleRequestDto dto) {
+    public ResponseEntity<ArticleResponseDto> create(@Valid @RequestBody ArticleRequestDto dto) {
         return ResponseEntity.ok(articleService.create(dto));
     }
 
     @GetMapping
-    public ResponseEntity<List<ArticleResponseDto>> findAll() {
-        return ResponseEntity.ok(articleService.findAll());
+    public ResponseEntity<Page<ArticleResponseDto>> findAll(
+            @PageableDefault(size=10, sort="createdAt", direction= Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(articleService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
@@ -32,7 +41,7 @@ public class ArticleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ArticleResponseDto> update(@PathVariable Long id, @RequestBody ArticleRequestDto dto) {
+    public ResponseEntity<ArticleResponseDto> update(@PathVariable Long id, @Valid @RequestBody ArticleRequestDto dto) {
         return ResponseEntity.ok(articleService.update(id, dto));
     }
 
@@ -40,5 +49,15 @@ public class ArticleController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         articleService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<ArticleResponseDto>> top(@RequestParam(defaultValue = "10") int n) {
+        return ResponseEntity.ok(articleService.topN(n));
+    }
+
+    @GetMapping("/{id}/views")
+    public ResponseEntity<Map<String, Long>> views(@PathVariable Long id) {
+        return ResponseEntity.ok(Map.of("id", id, "views", articleService.getViews(id)));
     }
 }
