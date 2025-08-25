@@ -49,7 +49,7 @@ public class UserService {
 
         String token = tokenProvider.generateToken(user.getEmail());
 
-        return new LoginResponseDto(user.getEmail(), token);
+        return new LoginResponseDto(token);
     }
 
 }

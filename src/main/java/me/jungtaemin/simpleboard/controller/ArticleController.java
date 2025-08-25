@@ -1,10 +1,12 @@
 package me.jungtaemin.simpleboard.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import me.jungtaemin.simpleboard.dto.ArticleRequestDto;
 import me.jungtaemin.simpleboard.dto.ArticleResponseDto;
 import me.jungtaemin.simpleboard.service.ArticleService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,6 +24,7 @@ public class ArticleController {
 
     private final ArticleService articleService;
 
+    @Operation(summary = "게시글 생성", description = "로그인 후 JWT 필요")
     @PostMapping
     public ResponseEntity<ArticleResponseDto> create(@Valid @RequestBody ArticleRequestDto dto) {
         return ResponseEntity.ok(articleService.create(dto));
@@ -29,6 +32,7 @@ public class ArticleController {
 
     @GetMapping
     public ResponseEntity<Page<ArticleResponseDto>> findAll(
+            @ParameterObject
             @PageableDefault(size=10, sort="createdAt", direction= Sort.Direction.DESC)
             Pageable pageable
     ) {
