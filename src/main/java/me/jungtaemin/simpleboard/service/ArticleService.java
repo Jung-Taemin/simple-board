@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import me.jungtaemin.simpleboard.domain.Article;
 import me.jungtaemin.simpleboard.dto.ArticleRequestDto;
 import me.jungtaemin.simpleboard.dto.ArticleResponseDto;
+import me.jungtaemin.simpleboard.messaging.ArticleCreatedEvent;
+import me.jungtaemin.simpleboard.messaging.ArticleEventPublisher;
 import me.jungtaemin.simpleboard.repository.ArticleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +27,7 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final ArticleStatsService articleStatsService;
+    private final ArticleEventPublisher eventPublisher;
 
     private String currentEmail() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -43,6 +47,16 @@ public class ArticleService {
                 .build();
 
         Article saved = articleRepository.save(article);
+
+        eventPublisher.publishArticleCreated(
+                ArticleCreatedEvent.builder()
+                        .id(saved.getId())
+                        .title(saved.getTitle())
+                        .author(saved.getAuthor())
+                        .createdAt(Instant.now())
+                        .build()
+        );
+
         return new ArticleResponseDto(saved.getId(), saved.getTitle(), saved.getContent(), saved.getAuthor());
     }
 
